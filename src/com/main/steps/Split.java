@@ -10,6 +10,11 @@ public class Split {
 		StringTokenizer strTok = new StringTokenizer(sourceText, ".");
 		while (strTok.hasMoreElements()) {
 			String sentence = (String) strTok.nextElement();
+			
+			char c = sentence.charAt(sentence.length()-1);
+			if( Character.isAlphabetic(c) || Character.isDigit(c) )
+				sentence = sentence+".";
+			
 			strV.add(sentence);
 		}
 		
