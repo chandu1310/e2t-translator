@@ -6,6 +6,7 @@ import java.awt.Font;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.ArrayList;
 import java.util.Vector;
 
 import javax.swing.JButton;
@@ -15,7 +16,9 @@ import javax.swing.JPanel;
 import javax.swing.JSplitPane;
 import javax.swing.JTextArea;
 
+import com.main.model.Session;
 import com.main.steps.Split;
+import com.main.steps.Tokenize;
 
 public class TransUI extends JFrame {
 	
@@ -73,17 +76,43 @@ public class TransUI extends JFrame {
 		{
 			splitBtn.addActionListener(new ActionListener() {
 				public void actionPerformed(ActionEvent e) {
-					Vector<String> sentences = Split.executeStep(srcText.getText());
-					StringBuffer buffer = new StringBuffer();
-					for(String s : sentences){
-						buffer.append(s+".\n\n");
+					if(Session.state == Session.RAW){
+						Vector<String> sentences = Split.executeStep(srcText.getText());					
+						for(String s : sentences){
+							Session.sentences.add(s);
+						}
+						
+						if(sentences.size()>0)
+							Session.nextSentenceToTokenize = 0;
+					
+						Session.state = Session.SPLITTED;
+						
+						String displayString = Session.getTranslationText();
+						transText.setText( displayString );
 					}
-					transText.setText( buffer.toString() );
 				}
 			});
 			btnPanel.add(splitBtn); 
 			
+			tokenizeBtn.addActionListener(new ActionListener() {
+				public void actionPerformed(ActionEvent e) {
+					
+					if(Session.state == Session.SPLITTED){
+						String sentence = Session.getNextSentenceForTokenizing();					
+						
+						Session.tokenizedSentences.add(
+									Tokenize.executeStep(sentence)
+								);
+								
+	
+						String displayString = Session.getTranslationText();
+						transText.setText( displayString );
+					}
+					
+				}
+			});
 			btnPanel.add(tokenizeBtn);
+			
 			btnPanel.add(tagBtn); 
 			btnPanel.add(chunkBtn);
 			btnPanel.add(reorderBtn); 
@@ -92,7 +121,9 @@ public class TransUI extends JFrame {
 			
 			clearBtn.addActionListener(new ActionListener() {
 				public void actionPerformed(ActionEvent arg0) {
+					Session.reset();
 					srcText.setText("");
+					transText.setText("");
 				}
 			});
 			btnPanel.add(clearBtn);
