@@ -1,0 +1,1 @@
+English to Telugu Translator implementation as a java desktop application
